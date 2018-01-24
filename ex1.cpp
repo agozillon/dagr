@@ -1,6 +1,6 @@
 #include <cstring>
 #include <SYCL/sycl.hpp>
-#include "dagr.hpp"
+#include "dagr/dagr.hpp"
 
 struct abc {
   template <typename I, typename T>

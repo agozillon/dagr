@@ -1,6 +1,6 @@
 #include <cstring>
 #include <SYCL/sycl.hpp>
-#include "dagr.hpp"
+#include "dagr/dagr.hpp"
 
 // Like bugs/local_barrier_bug.cpp, this barrier code needs -O2 or -O3 flags
 // Instead of lo<char>(8), a 64 char device-side buffer should also work.

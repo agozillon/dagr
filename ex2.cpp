@@ -1,5 +1,5 @@
 #include <SYCL/sycl.hpp>
-#include "dagr.hpp"
+#include "dagr/dagr.hpp"
 
 struct vec_add {
   template <typename I, typename T>

@@ -1,5 +1,5 @@
 #include <SYCL/sycl.hpp>
-#include "dagr.hpp"
+#include "dagr/dagr.hpp"
 
 // This tests calls to OpenCL builtins: clamp and normalize
 
