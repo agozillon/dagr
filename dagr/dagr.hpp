@@ -295,13 +295,15 @@ template <bool>
 template <>
 struct acc<true> {
   template <typename A>
-  static auto data(A a) -> decltype(&a[0]) { return &a[0]; }
+  static auto data(A a) -> decltype(a.get_device_ptr()) {
+    return a.get_device_ptr();
+  }
 };
 
 template <>
 struct acc<false> {
   template <typename A>
-  static auto data(A a) -> decltype( a[0]) { return  a[0]; }
+  static auto data(A a) -> decltype( a[0]) { return a[0]; }
 };
 
 template <typename T, typename U, U tag>
