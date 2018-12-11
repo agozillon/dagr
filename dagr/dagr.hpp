@@ -1,16 +1,16 @@
-/*                                                                             
-                                                                              
+/*
+
  Copyright (c) 2015-2018 Paul Keir, University of the West of Scotland.
-                                                                                
+
  */
 
 #ifndef _DAGR_HPP_
 #define _DAGR_HPP_
 
 #include <utility>          // std::forward
-#ifdef __TRISYCL__
+#ifdef TRISYCL
 #include <CL/sycl.hpp>
-using int_t = size_t;  // SYCL 1.2: id and range (hopefully not in next SYCL)
+using int_t = int;  // SYCL 1.2: id and range (hopefully not in next SYCL)
 #else
 #include <SYCL/sycl.hpp>
 using int_t = int;     // SYCL 1.2: item nd_item buffer accessor nd_range
@@ -43,7 +43,7 @@ template <typename T> struct detag                        : id<T>           {};
 template <typename T, typename U, U tag>
 struct detag<tag_t<T,U,tag>>                              : id<T>           {};
 
-} // namespace impl 
+} // namespace impl
 
 template <typename T, typename U, U tag>
 struct tag_match : impl::tag_match<typename std::decay<T>::type,U,tag> {};
@@ -119,7 +119,7 @@ struct is_buffer                          : std::false_type {};
 template <typename T, int_t D, typename A>
 struct is_buffer<cl::sycl::buffer<T,D,A>> : std::true_type {};
 
-} // namespace impl 
+} // namespace impl
 
 template <typename T>
 using is_buffer = impl::is_buffer<typename std::decay<T>::type>;
@@ -183,7 +183,7 @@ struct is_local               : std::false_type {};
 template <typename T, int_t N>
 struct is_local<local_t<T,N>> : std::true_type {};
 
-} // namespace impl 
+} // namespace impl
 
 template <typename T>
 using is_local = impl::is_local<typename std::decay<T>::type>;
@@ -294,10 +294,14 @@ template <bool>
 
 template <>
 struct acc<true> {
+  #ifdef TRISYCL
   template <typename A>
-  static auto data(A a) -> decltype(a.get_device_ptr()) {
-    return a.get_device_ptr();
-  }
+  static auto data(A a) -> decltype(&a[0]) { return &a[0]; }
+  #else // triSYCL doesn't have get_device_ptr and its not in the spec right now
+   static auto data(A a) -> decltype(a.get_device_ptr()) {
+       return a.get_device_ptr();
+    }
+  #endif
 };
 
 template <>
