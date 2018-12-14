@@ -294,8 +294,8 @@ template <bool>
 
 template <>
 struct acc<true> {
-  #ifdef TRISYCL
   template <typename A>
+  #ifdef TRISYCL
   static auto data(A a) -> decltype(&a[0]) { return &a[0]; }
   #else // triSYCL doesn't have get_device_ptr and its not in the spec right now
    static auto data(A a) -> decltype(a.get_device_ptr()) {
