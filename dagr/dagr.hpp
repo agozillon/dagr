@@ -10,10 +10,8 @@
 #include <utility>          // std::forward
 #ifdef TRISYCL
 #include <CL/sycl.hpp>
-using int_t = int;  // SYCL 1.2: id and range (hopefully not in next SYCL)
 #else
 #include <SYCL/sycl.hpp>
-using int_t = int;     // SYCL 1.2: item nd_item buffer accessor nd_range
 #endif
 
 template <typename T>
@@ -116,7 +114,7 @@ namespace impl {
 
 template <typename T>
 struct is_buffer                          : std::false_type {};
-template <typename T, int_t D, typename A>
+template <typename T, int D, typename A>
 struct is_buffer<cl::sycl::buffer<T,D,A>> : std::true_type {};
 
 } // namespace impl
@@ -142,7 +140,7 @@ namespace impl {
 using namespace cl::sycl;
 template <typename T>
 struct is_accessor                                : std::false_type {};
-template <typename T, int_t D, access::mode Am, access::target At>
+template <typename T, int D, access::mode Am, access::target At>
 struct is_accessor<cl::sycl::accessor<T,D,Am,At>> : std::true_type {};
 
 } // namespace impl
@@ -156,7 +154,7 @@ template <typename T> constexpr bool is_accessor_v() {
 
 // local_t - holds the arguments needed to allocate a local accessor.
 
-template <typename T, int_t N>
+template <typename T, int N>
 struct local_t { using type = T; cl::sycl::range<N> r; };
 
 namespace dagr {
@@ -180,7 +178,7 @@ namespace impl {
 
 template <typename T>
 struct is_local               : std::false_type {};
-template <typename T, int_t N>
+template <typename T, int N>
 struct is_local<local_t<T,N>> : std::true_type {};
 
 } // namespace impl
@@ -229,10 +227,10 @@ template <typename,unsigned>
 template <typename>
   struct get_item;
 
-template <int_t N>
+template <int N>
 struct get_item<cl::sycl::nd_range<N>> { using type = cl::sycl::nd_item<N>; };
 
-template <int_t N>
+template <int N>
 struct get_item<cl::sycl::range<N>>    { using type = cl::sycl::item<N>;    };
 
 template <typename T>
@@ -265,7 +263,7 @@ a_mode() {
   return cl::sycl::access::mode::read;
 }
 
-template <cl::sycl::access::mode Am, typename T, int_t D, typename A>
+template <cl::sycl::access::mode Am, typename T, int D, typename A>
 inline
 auto make_accessor(const cl::sycl::buffer<T,D,A> &x, cl::sycl::handler &cgh)
  -> decltype(
@@ -273,7 +271,7 @@ auto make_accessor(const cl::sycl::buffer<T,D,A> &x, cl::sycl::handler &cgh)
   return const_cast<cl::sycl::buffer<T,D,A> &>(x).template get_access<Am>(cgh);
 }
 
-template <cl::sycl::access::mode Am, typename T, int_t N>
+template <cl::sycl::access::mode Am, typename T, int N>
 inline
 auto make_accessor(const local_t<T,N> &l, cl::sycl::handler &cgh)
   -> decltype(cl::sycl::accessor<T,N,Am,
@@ -297,7 +295,8 @@ struct acc<true> {
   template <typename A>
   #ifdef TRISYCL
   static auto data(A a) -> decltype(&a[0]) { return &a[0]; }
-  #else // triSYCL doesn't have get_device_ptr and its not in the spec right now
+  #else // triSYCL doesn't have get_device_ptr and I don't believe it's in the
+        //spec right now
    static auto data(A a) -> decltype(a.get_device_ptr()) {
        return a.get_device_ptr();
     }
@@ -318,12 +317,12 @@ inline auto remove_tag(const tag_t<T,U,tag> &o)
 template <typename T>
 inline const T &remove_tag(const T &x) { return x; }
 
-template <typename T, int_t D, typename A>
+template <typename T, int D, typename A>
 inline const cl::sycl::buffer<T,D,A> &
 make_buffer_if(const cl::sycl::buffer<T,D,A> &b) { return b; }
 
 // Do nothing. No buffer-making here.
-template <typename T, int_t N>
+template <typename T, int N>
 inline const local_t<T,N> &
 make_buffer_if(const local_t<T,N> &l) { return l; }
 
